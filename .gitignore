@@ -1,0 +1,6 @@
+node_modules
+client/webpack-build/*.*
+client/build/*.*
+npm-debug.log
+stats.json
+.idea/*.*
