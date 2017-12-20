@@ -11,7 +11,7 @@ function ApiBuilder(app) {
     this.app = app;
     this.config = {
         'invoice': {
-            controller: require('./controllers/InvoiceController'),
+            controller: require('./controllers/InvoiceApiController'),
             model: require('./models/InvoiceModel'),
         }
     };
@@ -45,9 +45,19 @@ ApiBuilder.prototype.buildControllers = function(){
 };
 
 ApiBuilder.prototype.createRoutesForController = function(controllerName, controllerInstance){
-    this.app.get('/api/'+controllerName, controllerInstance.getAll.bind(controllerInstance));
-    this.app.get('/api/'+controllerName+'/:id', controllerInstance.getById.bind(controllerInstance));
-    this.app.post('/api/'+controllerName, controllerInstance.create.bind(controllerInstance));
-    this.app.put('/api/'+controllerName+'/:id', controllerInstance.update.bind(controllerInstance));
-    this.app.delete('/api/'+controllerName+'/:id', controllerInstance.delete.bind(controllerInstance));
+    if (controllerInstance.getAll) {
+        this.app.get('/api/' + controllerName, controllerInstance.getAll.bind(controllerInstance));
+    }
+    if (controllerInstance.getById) {
+        this.app.get('/api/' + controllerName + '/:id', controllerInstance.getById.bind(controllerInstance));
+    }
+    if (controllerInstance.create) {
+        this.app.post('/api/' + controllerName, controllerInstance.create.bind(controllerInstance));
+    }
+    if (controllerInstance.update) {
+        this.app.put('/api/' + controllerName + '/:id', controllerInstance.update.bind(controllerInstance));
+    }
+    if (controllerInstance.delete) {
+        this.app.delete('/api/' + controllerName + '/:id', controllerInstance.delete.bind(controllerInstance));
+    }
 };

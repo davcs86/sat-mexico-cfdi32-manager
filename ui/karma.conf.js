@@ -9,7 +9,7 @@ module.exports = function (config) {
   var _config = {
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: '../',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
@@ -72,7 +72,7 @@ module.exports = function (config) {
     _config.reporters.push("coverage");
 
     _config.coverageReporter = {
-      dir: 'coverage/',
+      dir: 'ui/src/coverage/',
       reporters: [{
         type: 'json',
         dir: 'coverage',
