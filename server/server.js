@@ -24,9 +24,9 @@ app.use(expressWinston.logger({
     colorize: false, // Color the text and status code, using the Express/morgan color palette (text: gray, status: default green, 3XX cyan, 4XX yellow, 5XX red).
 }));
 
-app.set('views', __dirname + '/../frontend/public/');
+app.set('views', __dirname + '/../ui/public/');
 
-app.use(express["static"](path.join(__dirname, '../frontend/public/')));
+app.use(express["static"](path.join(__dirname, '../ui/public/')));
 
 app.use(bodyParser.json());
 

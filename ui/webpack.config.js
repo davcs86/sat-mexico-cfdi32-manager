@@ -7,7 +7,9 @@ const path = require('path');
 const webpack = require('webpack');
 
 // webpack plugins
-
+const CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 // export config generator
 
@@ -18,17 +20,19 @@ module.exports = createWebpackConfig;
 function createWebpackConfig(){
     const config = {};
 
-    let outputDir = process.env.OUTPUT_DIR || './public/js';
+    let outputDir = process.env.OUTPUT_DIR || './public';
 
     if (!path.isAbsolute(outputDir)){
         outputDir = path.resolve(__dirname, outputDir);
     }
 
+    console.log(__dirname, outputDir);
+
     // entry points
     config.entry = {
-        'polyfills': './src/polyfills.ts',
-        'vendor': './src/vendor.ts',
-        'app': './src/main.ts' // our angular app
+        'polyfills': './ui/src/polyfills.ts',
+        'vendor': './ui/src/vendor.ts',
+        'app': './ui/src/main.ts' // our angular app
     };
 
     // dev-tools
@@ -54,26 +58,112 @@ function createWebpackConfig(){
     };
 
     // Support for .ts files.
-    config.module.push({
+    config.module.rules.push({
         test: /\.ts$/,
-        loaders: ['awesome-typescript-loader'],
+        loaders: ['awesome-typescript-loader', 'angular2-template-loader?keepUrl=true'],
         exclude: [/\.(spec|e2e)\.ts$/, /node_modules\/(?!(ng2-.+))/]
     });
 
     // Support for *.json files.
-    config.module.push({
+    config.module.rules.push({
         test: /\.json$/, loader: 'json-loader'
     });
 
-    // Support for *.css files
-    config.module.push({
+    // Support for *.html files
+    config.module.rules.push({
+        test: /\.html$/,
+        loader: 'raw-loader'
+    });
+
+    // Support for *.css files (outside of the app)
+    config.module.rules.push({
         test: /\.css$/,
-        exclude: root('src', 'app'),
+        exclude: [
+            path.resolve(__dirname, './src')
+        ],
         loader: ExtractTextPlugin.extract({
             fallback: 'style-loader',
-            use: ['css-loader']
+            use: [
+            {
+                loader: 'css-loader',
+                options: {
+                    minimize: true
+                }
+            },
+            {
+                loader: 'postcss-loader'
+            }]
         })
     });
+
+    // Support for *.css files (inside of the app)
+    config.module.rules.push({
+        test: /\.css$/,
+        include:  [
+            path.resolve(__dirname, './src')
+        ],
+        loader: 'raw-loader'
+    });
+
+    // Support for *.scss files
+    config.module.rules.push({
+        test: /\.scss$/,
+        loader: ExtractTextPlugin.extract({
+            fallback: 'style-loader',
+            use: [{
+                loader: 'css-loader',
+                options: {
+                    minimize: true
+                }
+            },
+            {
+                loader: 'postcss-loader'
+            },
+            {
+                loader: 'sass-loader'
+            }]
+        })
+    });
+
+    // Dev server
+    config.devServer = {
+        contentBase: outputDir,
+        noInfo: false,
+        hot: true,
+        inline: true,
+        port: 8083
+    };
+
+    // Plugins
+    config.plugins = [];
+
+    //config.plugins.push(new webpack.HotModuleReplacementPlugin());
+
+    config.plugins.push(new webpack.DefinePlugin({
+        // Environment helpers
+        'process.env': {
+            ENV: JSON.stringify(process.env.ENVIRON)
+        }
+    }));
+
+    config.plugins.push(new webpack.ContextReplacementPlugin(
+        /@angular[\\\/]core[\\\/]esm5/,
+        path.resolve(__dirname, './src')
+    ));
+
+    config.plugins.push(new CommonsChunkPlugin({
+        name: ['vendor', 'polyfills']
+    }));
+
+    config.plugins.push(new HtmlWebpackPlugin({
+        template: './ui/src/index.html',
+        chunksSortMode: 'dependency'
+    }));
+
+    config.plugins.push(new ExtractTextPlugin({
+        filename: 'css/[name].[hash].css',
+        //disable: !isProd
+    }));
 
     return config;
 }

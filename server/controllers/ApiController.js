@@ -4,7 +4,7 @@ const inherits = require('inherits'),
     BaseController = require('./BaseController');
 
 function ApiController(model){
-    ApiController.call(this, model);
+    BaseController.call(this, model);
 }
 
 inherits(ApiController, BaseController);
