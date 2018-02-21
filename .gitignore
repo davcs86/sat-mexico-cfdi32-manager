@@ -64,3 +64,5 @@ typings/
 
 /ui/public/**/*
 /yarn.lock
+/consumer/data/*.xml
+/consumer/output_data/*
